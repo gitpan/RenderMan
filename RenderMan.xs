@@ -8,47 +8,51 @@ extern "C" {
 }
 #endif
 
-#include "/home/guest/glewis/include/ri.h"
+#include "ri.h"
 
 #define XS_unpack_RtTokenPtr(b) ((RtToken*)SvPV(b,na))
 #define XS_unpack_RtPointerPtr(b) ((RtPointer*)SvPV(b,na))
 
-RtInt get_RtInt_from_array(AV* array, int index)
+RtInt get_RtInt_from_array(AV* array, int index, char* funcname, char* paramname)
 {
     RtInt val = 0;
     SV* sv = *av_fetch(array, index, FALSE);
     if (SvIOK(sv)) {
 	val = (RtInt)SvIV(sv);
     } else if (SvNOK(sv)) {
-	warn("RtInt array element #%d is a double - possibly losing precision", index);
+	warn("%s parameter %s array element #%d is a double - possibly losing precision",
+             funcname, paramname, index);
 	val = (RtInt)SvNV(sv);
     } else {
-	croak("RtInt array element #%d is not an RtInt", index);
+	croak("%s parameter %s array element #%d is not an RtInt",
+              funcname, paramname, index);
     }
     return(val);
 }
 
-RtInt* get_RtInt_array(RtInt nloops, SV* svp)
+RtInt* get_RtInt_array(RtInt nloops, SV* svp, char* funcname, char* paramname)
 {
     AV* array;
     long count;
     RtInt* val = 0;
     if (!SvROK(svp))
-	croak("RtInt array parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a %d-element RtInt array",
+              funcname, paramname, nloops);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("RtInt array parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a %d-element RtInt array",
+              funcname, paramname, nloops);
     if (1 + av_len(array) != nloops)
-	croak("RtInt array length should be %d but is %d",
-	      nloops, 1 + av_len(array));
-    if (!(val = malloc(nloops*sizeof(RtInt))))
+	croak("%s parameter %s array length should be %d of RtInt but is %d",
+	      funcname, paramname, nloops, 1 + av_len(array));
+    if (!(val = (RtInt*)malloc(nloops*sizeof(RtInt))))
 	croak("Out of memory in get_RtInt_array");
     for (count=0; count<=av_len(array); count++)
-	val[count] = get_RtInt_from_array(array, count);
+	val[count] = get_RtInt_from_array(array, count, funcname, paramname);
     return(val);
 }
 
-RtFloat get_RtFloat_from_sv(SV* sv)
+RtFloat get_RtFloat_from_sv(SV* sv, char* funcname, char* paramname)
 {
     RtFloat val = 0.0;
     if (SvIOK(sv)) {
@@ -56,12 +60,12 @@ RtFloat get_RtFloat_from_sv(SV* sv)
     } else if (SvNOK(sv)) {
 	val = (RtFloat)SvNV(sv);
     } else {
-	croak("Parameter is not an RtFloat");
+	croak("%s parameter %s is not an RtFloat", funcname, paramname);
     }
     return(val);
 }
 
-RtFloat get_RtFloat_from_array(AV* array, int index)
+RtFloat get_RtFloat_from_array(AV* array, int index, char* funcname, char* paramname)
 {
     RtFloat val = 0.0;
     SV* sv = *av_fetch(array, index, FALSE);
@@ -70,138 +74,154 @@ RtFloat get_RtFloat_from_array(AV* array, int index)
     } else if (SvNOK(sv)) {
 	val = (RtFloat)SvNV(sv);
     } else {
-	croak("RtFloat array element #%d is not an RtFloat", index);
+	croak("%s parameter %s array element #%d is not an RtFloat",
+              funcname, paramname, index);
     }
     return(val);
 }
 
-void get_RtPoint(RtPoint* p, SV* svp)
+void get_RtPoint(RtPoint* p, SV* svp, char* funcname, char* paramname)
 {
     AV* array;
     if (!SvROK(svp))
-	croak("Point parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 3-element (RtPoint) array",
+              funcname, paramname);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("Point parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 3-element (RtPoint) array",
+              funcname, paramname);
     if (av_len(array) != 2)
-	croak("Point array length should be 3 but is %d", 1 + av_len(array));
-    (*p)[0] = get_RtFloat_from_array(array, 0);
-    (*p)[1] = get_RtFloat_from_array(array, 1);
-    (*p)[2] = get_RtFloat_from_array(array, 2);
+	croak("%s parameter %s array length should be 3 for RtPoint but is %d",
+              funcname, paramname, 1 + av_len(array));
+    (*p)[0] = get_RtFloat_from_array(array, 0, funcname, paramname);
+    (*p)[1] = get_RtFloat_from_array(array, 1, funcname, paramname);
+    (*p)[2] = get_RtFloat_from_array(array, 2, funcname, paramname);
 }
 
-RtFloat* get_RtFloat_array(RtInt nloops, SV* svp)
+RtFloat* get_RtFloat_array(RtInt nloops, SV* svp, char* funcname, char* paramname)
 {
     AV* array;
     long count;
     RtFloat* val = 0;
     if (!SvROK(svp))
-	croak("RtFloat array parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a %d-element array of RtFloat",
+              funcname, paramname, nloops);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("RtFloat array parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a %d-element array of RtFloat",
+              funcname, paramname, nloops);
     if (1 + av_len(array) != nloops)
-	croak("RtFloat array length should be %d but is %d",
+	croak("%s parameter %s RtFloat array length should be %d but is %d",
+              funcname, paramname,
 	      nloops, 1 + av_len(array));
-    if (!(val = malloc(nloops*sizeof(RtFloat))))
-	croak("Out of memory in get_RtFloat_array");
+    if (!(val = (RtFloat*)malloc(nloops*sizeof(RtFloat))))
+	croak("Out of memory in get_RtFloat_array for function %s, parameter %s",
+              funcname, paramname);
     for (count=0; count<=av_len(array); count++)
-	val[count] = get_RtFloat_from_array(array, count);
+	val[count] = get_RtFloat_from_array(array, count, funcname, paramname);
     return(val);
 }
 
-void get_RtColor(SV* svp, RtColor* color)
+void get_RtColor(SV* svp, RtColor* color, char* funcname, char* paramname)
 {
     AV* array;
     if (!SvROK(svp))
-	croak("RtFloat array parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 3-element (RtColor) array",
+              funcname, paramname);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("RtFloat array parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 3-element (RtColor) array",
+              funcname, paramname);
     if (1 + av_len(array) != 3)
-	croak("RtFloat array length should be 3 for RtColor but is %d",
-	      1 + av_len(array));
-    (*color)[0] = get_RtFloat_from_array(array, 0);
-    (*color)[1] = get_RtFloat_from_array(array, 1);
-    (*color)[2] = get_RtFloat_from_array(array, 2);
+	croak("%s parameter %s array length should be 3 for RtColor but is %d",
+	      funcname, paramname, 1 + av_len(array));
+    (*color)[0] = get_RtFloat_from_array(array, 0, funcname, paramname);
+    (*color)[1] = get_RtFloat_from_array(array, 1, funcname, paramname);
+    (*color)[2] = get_RtFloat_from_array(array, 2, funcname, paramname);
 }
 
-void get_RtBound(SV* svp, RtBound* bound)
+void get_RtBound(SV* svp, RtBound* bound, char* funcname, char* paramname)
 {
     AV* array;
     if (!SvROK(svp))
-	croak("RtFloat array parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 6-element (RtBound) array",
+              funcname, paramname);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("RtFloat array parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 6-element (RtBound) array",
+              funcname, paramname);
     if (1 + av_len(array) != 6)
-	croak("RtFloat array length should be 6 for RtBound but is %d",
-	      1 + av_len(array));
-    (*bound)[0] = get_RtFloat_from_array(array, 0);
-    (*bound)[1] = get_RtFloat_from_array(array, 1);
-    (*bound)[2] = get_RtFloat_from_array(array, 2);
-    (*bound)[3] = get_RtFloat_from_array(array, 3);
-    (*bound)[4] = get_RtFloat_from_array(array, 4);
-    (*bound)[5] = get_RtFloat_from_array(array, 5);
+	croak("%s parameter %s array length should be 6 for RtBound but is %d",
+	      funcname, paramname, 1 + av_len(array));
+    (*bound)[0] = get_RtFloat_from_array(array, 0, funcname, paramname);
+    (*bound)[1] = get_RtFloat_from_array(array, 1, funcname, paramname);
+    (*bound)[2] = get_RtFloat_from_array(array, 2, funcname, paramname);
+    (*bound)[3] = get_RtFloat_from_array(array, 3, funcname, paramname);
+    (*bound)[4] = get_RtFloat_from_array(array, 4, funcname, paramname);
+    (*bound)[5] = get_RtFloat_from_array(array, 5, funcname, paramname);
 }
 
-void get_RtBasis(SV* svp, RtBasis* basis)
+void get_RtBasis(SV* svp, RtBasis* basis, char* funcname, char* paramname)
 {
     AV* array;
     if (!SvROK(svp))
-	croak("RtFloat array parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 16-element (RtBasis) array",
+              funcname, paramname);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("RtFloat array parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 16-element (RtBasis) array",
+              funcname, paramname);
     if (1 + av_len(array) != 16)
-	croak("RtFloat array length should be 16 for RtBasis but is %d",
-	      1 + av_len(array));
-    (*basis)[0][0] = get_RtFloat_from_array(array, 0);
-    (*basis)[0][1] = get_RtFloat_from_array(array, 1);
-    (*basis)[0][2] = get_RtFloat_from_array(array, 2);
-    (*basis)[0][3] = get_RtFloat_from_array(array, 3);
-    (*basis)[1][0] = get_RtFloat_from_array(array, 4);
-    (*basis)[1][1] = get_RtFloat_from_array(array, 5);
-    (*basis)[1][2] = get_RtFloat_from_array(array, 6);
-    (*basis)[1][3] = get_RtFloat_from_array(array, 7);
-    (*basis)[2][0] = get_RtFloat_from_array(array, 8);
-    (*basis)[2][1] = get_RtFloat_from_array(array, 9);
-    (*basis)[2][2] = get_RtFloat_from_array(array, 10);
-    (*basis)[2][3] = get_RtFloat_from_array(array, 11);
-    (*basis)[3][0] = get_RtFloat_from_array(array, 12);
-    (*basis)[3][1] = get_RtFloat_from_array(array, 13);
-    (*basis)[3][2] = get_RtFloat_from_array(array, 14);
-    (*basis)[3][3] = get_RtFloat_from_array(array, 15);
+	croak("%s parameter %s array length should be 16 for RtBasis but is %d",
+	      funcname, paramname, 1 + av_len(array));
+    (*basis)[0][0] = get_RtFloat_from_array(array, 0, funcname, paramname);
+    (*basis)[0][1] = get_RtFloat_from_array(array, 1, funcname, paramname);
+    (*basis)[0][2] = get_RtFloat_from_array(array, 2, funcname, paramname);
+    (*basis)[0][3] = get_RtFloat_from_array(array, 3, funcname, paramname);
+    (*basis)[1][0] = get_RtFloat_from_array(array, 4, funcname, paramname);
+    (*basis)[1][1] = get_RtFloat_from_array(array, 5, funcname, paramname);
+    (*basis)[1][2] = get_RtFloat_from_array(array, 6, funcname, paramname);
+    (*basis)[1][3] = get_RtFloat_from_array(array, 7, funcname, paramname);
+    (*basis)[2][0] = get_RtFloat_from_array(array, 8, funcname, paramname);
+    (*basis)[2][1] = get_RtFloat_from_array(array, 9, funcname, paramname);
+    (*basis)[2][2] = get_RtFloat_from_array(array, 10, funcname, paramname);
+    (*basis)[2][3] = get_RtFloat_from_array(array, 11, funcname, paramname);
+    (*basis)[3][0] = get_RtFloat_from_array(array, 12, funcname, paramname);
+    (*basis)[3][1] = get_RtFloat_from_array(array, 13, funcname, paramname);
+    (*basis)[3][2] = get_RtFloat_from_array(array, 14, funcname, paramname);
+    (*basis)[3][3] = get_RtFloat_from_array(array, 15, funcname, paramname);
 }
 
 /* Just in case a RtBasis changes from a RtMatrix in the future */
-void get_RtMatrix(SV* svp, RtMatrix* matrix)
+void get_RtMatrix(SV* svp, RtMatrix* matrix, char* funcname, char* paramname)
 {
     AV* array;
     if (!SvROK(svp))
-	croak("RtFloat array parameter is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 16-element (RtMatrix) array",
+              funcname, paramname);
     array = (AV*)SvRV(svp);
     if (SvTYPE(array) != SVt_PVAV)
-	croak("RtFloat array parameter reference is not a reference to an array");
+	croak("%s parameter %s is not a reference to a 16-element (RtMatrix) array",
+              funcname, paramname);
     if (1 + av_len(array) != 16)
-	croak("RtFloat array length should be 16 for RtMatrix but is %d",
-	      1 + av_len(array));
-    (*matrix)[0][0] = get_RtFloat_from_array(array, 0);
-    (*matrix)[0][1] = get_RtFloat_from_array(array, 1);
-    (*matrix)[0][2] = get_RtFloat_from_array(array, 2);
-    (*matrix)[0][3] = get_RtFloat_from_array(array, 3);
-    (*matrix)[1][0] = get_RtFloat_from_array(array, 4);
-    (*matrix)[1][1] = get_RtFloat_from_array(array, 5);
-    (*matrix)[1][2] = get_RtFloat_from_array(array, 6);
-    (*matrix)[1][3] = get_RtFloat_from_array(array, 7);
-    (*matrix)[2][0] = get_RtFloat_from_array(array, 8);
-    (*matrix)[2][1] = get_RtFloat_from_array(array, 9);
-    (*matrix)[2][2] = get_RtFloat_from_array(array, 10);
-    (*matrix)[2][3] = get_RtFloat_from_array(array, 11);
-    (*matrix)[3][0] = get_RtFloat_from_array(array, 12);
-    (*matrix)[3][1] = get_RtFloat_from_array(array, 13);
-    (*matrix)[3][2] = get_RtFloat_from_array(array, 14);
-    (*matrix)[3][3] = get_RtFloat_from_array(array, 15);
+	croak("%s parameter %s array length should be 16 for RtMatrix but is %d",
+	      funcname, paramname, 1 + av_len(array));
+    (*matrix)[0][0] = get_RtFloat_from_array(array, 0, funcname, paramname);
+    (*matrix)[0][1] = get_RtFloat_from_array(array, 1, funcname, paramname);
+    (*matrix)[0][2] = get_RtFloat_from_array(array, 2, funcname, paramname);
+    (*matrix)[0][3] = get_RtFloat_from_array(array, 3, funcname, paramname);
+    (*matrix)[1][0] = get_RtFloat_from_array(array, 4, funcname, paramname);
+    (*matrix)[1][1] = get_RtFloat_from_array(array, 5, funcname, paramname);
+    (*matrix)[1][2] = get_RtFloat_from_array(array, 6, funcname, paramname);
+    (*matrix)[1][3] = get_RtFloat_from_array(array, 7, funcname, paramname);
+    (*matrix)[2][0] = get_RtFloat_from_array(array, 8, funcname, paramname);
+    (*matrix)[2][1] = get_RtFloat_from_array(array, 9, funcname, paramname);
+    (*matrix)[2][2] = get_RtFloat_from_array(array, 10, funcname, paramname);
+    (*matrix)[2][3] = get_RtFloat_from_array(array, 11, funcname, paramname);
+    (*matrix)[3][0] = get_RtFloat_from_array(array, 12, funcname, paramname);
+    (*matrix)[3][1] = get_RtFloat_from_array(array, 13, funcname, paramname);
+    (*matrix)[3][2] = get_RtFloat_from_array(array, 14, funcname, paramname);
+    (*matrix)[3][3] = get_RtFloat_from_array(array, 15, funcname, paramname);
 }
 
 void free_token_params(int count, RtToken* tokens, RtPointer* params)
@@ -214,7 +234,8 @@ void free_token_params(int count, RtToken* tokens, RtPointer* params)
     }
 }
 
-RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params)
+RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
+                         char* funcname, char* paramname)
 {
   HV* hash;
   SV* sv;
@@ -294,7 +315,7 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params)
 		  if (!(val = (RtFloat*)malloc(len*sizeof(RtFloat))))
 		      croak("Out of memory in build_token_params");
 		  for (len=0; len<=av_len((AV*)SvRV(sv)); len++)
-		    val[len] = get_RtFloat_from_array((AV*)SvRV(sv), len);
+		    val[len] = get_RtFloat_from_array((AV*)SvRV(sv), len, funcname, paramname);
 		  params[count] = (RtPointer)val;
 		  count++;
 		  /* warn("WARNING: ignoring hash key '%s'...type is a reference to an array", key); */
@@ -925,6 +946,34 @@ RI_Z()
     OUTPUT:
     RETVAL
 
+RtToken
+RI_LINEAR()
+    CODE:
+    RETVAL = RI_LINEAR;
+    OUTPUT:
+    RETVAL
+
+RtToken
+RI_CUBIC()
+    CODE:
+    RETVAL = RI_CUBIC;
+    OUTPUT:
+    RETVAL
+
+RtToken
+RI_WIDTH()
+    CODE:
+    RETVAL = RI_WIDTH;
+    OUTPUT:
+    RETVAL
+
+RtToken
+RI_CONSTANTWIDTH()
+    CODE:
+    RETVAL = RI_CONSTANTWIDTH;
+    OUTPUT:
+    RETVAL
+
 ######################################################################
 
 void
@@ -1151,7 +1200,7 @@ RiProjection(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Projection", "2 (params)");
 
 	if (count) {
             RiProjectionV(name, count, token, params);
@@ -1221,7 +1270,7 @@ RiImager(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Imager", "2 (params)");
 
 	if (count) {
             RiImagerV(name, count, token, params);
@@ -1259,7 +1308,7 @@ RiDisplay(name,type,mode, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(3), &token, &params);
+	count = build_token_params(ST(3), &token, &params, "Display", "4 (params)");
 
 	if (count) {
             RiDisplayV(name, type, mode, count, token, params);
@@ -1326,7 +1375,7 @@ RiHider(type, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Hider", "2 (params)");
 
 	if (!type || !type[0]) type = "null";
 	if (count) {
@@ -1347,8 +1396,8 @@ RiColorSamples(N,nRGB,RGBn)
     {
 	RtFloat* my_nRGB;
 	RtFloat* my_RGBn;
-	my_nRGB = get_RtFloat_array(3*N, ST(1));
-	my_RGBn = get_RtFloat_array(3*N, ST(2));
+	my_nRGB = get_RtFloat_array(3*N, ST(1), "ColorSamples", "2 (nRGB)");
+	my_RGBn = get_RtFloat_array(3*N, ST(2), "ColorSamples", "3 (RGBn)");
 	RiColorSamples(N, my_nRGB, my_RGBn);
 	free(my_RGBn);
 	free(my_nRGB);
@@ -1376,7 +1425,7 @@ RiOption(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Option", "2 (params)");
 
 	if (count) {
             RiOptionV(name, count, token, params);
@@ -1401,13 +1450,13 @@ RiColor(...)
     {
 	RtColor my_Cs;
 	if (items == 1) {
-	    get_RtColor(ST(0), &my_Cs);
+	    get_RtColor(ST(0), &my_Cs, "Color", "1 (color)");
 	} else if (items != 3) {
 	    croak("Usage: RenderMan::Color(r, g, b) or ...([r, g, b])");
 	} else {
-	    my_Cs[0] = get_RtFloat_from_sv(ST(0));
-	    my_Cs[1] = get_RtFloat_from_sv(ST(1));
-	    my_Cs[2] = get_RtFloat_from_sv(ST(2));
+	    my_Cs[0] = get_RtFloat_from_sv(ST(0), "Color", "1 (R)");
+	    my_Cs[1] = get_RtFloat_from_sv(ST(1), "Color", "2 (G)");
+	    my_Cs[2] = get_RtFloat_from_sv(ST(2), "Color", "3 (B)");
 	}
 	RiColor(my_Cs);
     }
@@ -1419,13 +1468,13 @@ RiOpacity(...)
     {
 	RtColor my_Os;
 	if (items == 1) {
-	    get_RtColor(ST(0), &my_Os);
+	    get_RtColor(ST(0), &my_Os, "Opacity", "1 (opacity)");
 	} else if (items != 3) {
 	    croak("Usage: RenderMan::Opacity(r, g, b) or ...([r, g, b])");
 	} else {
-	    my_Os[0] = get_RtFloat_from_sv(ST(0));
-	    my_Os[1] = get_RtFloat_from_sv(ST(1));
-	    my_Os[2] = get_RtFloat_from_sv(ST(2));
+	    my_Os[0] = get_RtFloat_from_sv(ST(0), "Opacity", "1 (R)");
+	    my_Os[1] = get_RtFloat_from_sv(ST(1), "Opacity", "2 (G)");
+	    my_Os[2] = get_RtFloat_from_sv(ST(2), "Opacity", "3 (B)");
 	}
 	RiOpacity(my_Os);
     }
@@ -1460,7 +1509,7 @@ RiLightSource(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "LightSource", "2 (params)");
 
 	if (count) {
             handle = RiLightSourceV(name, count, token, params);
@@ -1492,7 +1541,7 @@ RiAreaLightSource(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "AreaLightSource", "2 (params)");
 
 	if (count) {
             handle = RiAreaLightSourceV(name, count, token, params);
@@ -1534,7 +1583,7 @@ RiSurface(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Surface", "2 (params)");
 
 	if (count) {
             RiSurfaceV(name, count, token, params);
@@ -1561,7 +1610,7 @@ RiAtmosphere(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Atmosphere", "2 (params)");
 
 	if (count) {
             RiAtmosphereV(name, count, token, params);
@@ -1588,7 +1637,7 @@ RiInterior(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Interior", "2 (params)");
 
 	if (count) {
             RiInteriorV(name, count, token, params);
@@ -1615,7 +1664,7 @@ RiExterior(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Exterior", "2 (params)");
 
 	if (count) {
             RiExteriorV(name, count, token, params);
@@ -1647,7 +1696,7 @@ RiBound(bound)
     CODE:
     {
 	RtBound my_bound;
-	get_RtBound(bound, &my_bound);
+	get_RtBound(bound, &my_bound, "Bound", "1 (bound)");
 	RiBound(my_bound);
     }
 
@@ -1658,7 +1707,7 @@ RiDetail(bound)
     CODE:
     {
 	RtBound my_bound;
-	get_RtBound(bound, &my_bound);
+	get_RtBound(bound, &my_bound, "Detail", "1 (bound)");
 	RiDetail(my_bound);
     }
 
@@ -1680,10 +1729,6 @@ RiGeometricApproximation(type,value)
 void
 RiGeometricRepresentation(type)
     RtToken	type
-    CODE:
-    {
-	warn("RiGeometricRepresentation not implemented in BMRT 2.3.4");
-    }
 
 # RC p.121 - DONE
 void
@@ -1710,7 +1755,7 @@ RiTransform(transform)
     CODE:
     {
 	RtMatrix my_transform;
-	get_RtMatrix(transform, &my_transform);
+	get_RtMatrix(transform, &my_transform, "Transform", "1 (transform)");
 	RiTransform(my_transform);
     }
 
@@ -1721,7 +1766,7 @@ RiConcatTransform(transform)
     CODE:
     {
 	RtMatrix my_transform;
-	get_RtMatrix(transform, &my_transform);
+	get_RtMatrix(transform, &my_transform, "ConcatTransform", "1 (transform)");
 	RiConcatTransform(my_transform);
     }
 
@@ -1780,7 +1825,7 @@ RiDeformation(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Deformation", "2 (params)");
 
 	if (count) {
             RiDeformationV(name, count, token, params);
@@ -1807,7 +1852,7 @@ RiDisplacement(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Displacement", "2 (params)");
 
 	if (count) {
             RiDisplacementV(name, count, token, params);
@@ -1834,7 +1879,7 @@ RiTransformPoints(fromspace,tospace,npoints,points)
 	RtFloat* my_points;
 	long i;
 	npoints *= 3;
-	my_points = get_RtFloat_array(npoints, ST(2));
+	my_points = get_RtFloat_array(npoints, ST(3), "TransformPoints", "4 (points)");
 	if (!RiTransformPoints(fromspace,tospace,npoints,(RtPoint*)my_points))
 	    croak("Could not TransformPoints");
 	EXTEND(sp,npoints);
@@ -1868,7 +1913,7 @@ RiAttribute(name, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Attribute", "2 (params)");
 
 	if (count) {
             RiAttributeV(name, count, token, params);
@@ -1888,7 +1933,7 @@ RiPolygon(nvertices, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>2) {
+	if (items<1 || items>2) {
 	    croak("Usage: RenderMan::Polygon(nvertices, {params})");
 	    return;
 	}
@@ -1898,7 +1943,7 @@ RiPolygon(nvertices, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Polygon", "2 (params)");
 
 	if (count) {
             RiPolygonV(nvertices, count, token, params);
@@ -1920,12 +1965,12 @@ RiGeneralPolygon(nloops,nverts, ...)
 	RtPointer* params = 0;
 	RtInt *my_nverts = 0;
 
-	if (items>3) {
+	if (items<2 || items>3) {
 	    croak("Usage: RenderMan::GeneralPolygon(nloops, nverts, {params})");
 	    return;
 	}
 
-	my_nverts = get_RtInt_array(nloops, ST(1));
+	my_nverts = get_RtInt_array(nloops, ST(1), "GeneralPolygon", "2 (nverts)");
 
 	if (items == 2) {
 	    RiGeneralPolygon(nloops, my_nverts, RI_NULL);
@@ -1934,7 +1979,7 @@ RiGeneralPolygon(nloops,nverts, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(2), &token, &params);
+	count = build_token_params(ST(2), &token, &params, "GeneralPolygon", "3 (params)");
 
 	if (count) {
             RiGeneralPolygonV(nloops, my_nverts, count, token, params);
@@ -1960,14 +2005,14 @@ RiPointsPolygons(npolys,nverts,verts, ...)
 	RtInt *my_verts = 0;
 	long sum = 0;
 
-	if (items>4) {
+	if (items<3 || items>4) {
 	    croak("Usage: RenderMan::PointsPolygons(npolys, nverts, verts, {params})");
 	    return;
 	}
 
-	my_nverts = get_RtInt_array(npolys, ST(1));
+	my_nverts = get_RtInt_array(npolys, ST(1), "PointsPolygons", "2 (nverts)");
 	for (count=npolys; count--; ) sum += my_nverts[count];
-	my_verts = get_RtInt_array(sum, ST(2));
+	my_verts = get_RtInt_array(sum, ST(2), "PointsPolygons", "3 (verts)");
 
 	if (items == 3) {
 	    RiPointsPolygons(npolys, my_nverts, my_verts, RI_NULL);
@@ -1977,7 +2022,7 @@ RiPointsPolygons(npolys,nverts,verts, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(3), &token, &params);
+	count = build_token_params(ST(3), &token, &params, "PointsPolygons", "4 (params)");
 
 	if (count) {
             RiPointsPolygonsV(npolys, my_nverts, my_verts, count, token, params);
@@ -2007,16 +2052,16 @@ RiPointsGeneralPolygons(npolys,nloops,nverts,verts, ...)
 	long sum1 = 0;
 	long sum2 = 0;
 
-	if (items>5) {
+	if (items<4 || items>5) {
 	    croak("Usage: RenderMan::PointsGeneralPolygons(npolys, nloops, nverts, verts, {params})");
 	    return;
 	}
 
-	my_nloops = get_RtInt_array(npolys, ST(1));
+	my_nloops = get_RtInt_array(npolys, ST(1), "PointsGeneralPolygons", "2 (nloops)");
 	for (count=npolys; count--; ) sum1 += my_nloops[count];
-	my_nverts = get_RtInt_array(sum1, ST(2));
+	my_nverts = get_RtInt_array(sum1, ST(2), "PointsGeneralPolygons", "3 (nverts)");
 	for (count=sum1; count--; ) sum2 += my_nverts[count];
-	my_verts = get_RtInt_array(sum2, ST(3));
+	my_verts = get_RtInt_array(sum2, ST(3), "PointsGeneralPolygons", "4 (verts)");
 
 	if (items == 4) {
 	    RiPointsGeneralPolygons(npolys, my_nloops, my_nverts, my_verts, RI_NULL);
@@ -2027,7 +2072,7 @@ RiPointsGeneralPolygons(npolys,nloops,nverts,verts, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(4), &token, &params);
+	count = build_token_params(ST(4), &token, &params, "PointsGeneralPolygons", "5 (params)");
 
 	if (count) {
             RiPointsGeneralPolygonsV(npolys, my_nloops, my_nverts, my_verts, count, token, params);
@@ -2051,8 +2096,8 @@ RiBasis(ubasis,ustep,vbasis,vstep)
     {
 	RtBasis my_ubasis;
 	RtBasis my_vbasis;
-	get_RtBasis(ubasis, &my_ubasis);
-	get_RtBasis(vbasis, &my_vbasis);
+	get_RtBasis(ubasis, &my_ubasis, "Basis", "1 (ubasis)");
+	get_RtBasis(vbasis, &my_vbasis, "Basis", "3 (vbasis)");
 	RiBasis(my_ubasis, ustep, my_vbasis, vstep);
     }
 
@@ -2073,7 +2118,7 @@ RiPatch(type, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Patch", "2 (params)");
 
 	if (count) {
             RiPatchV(type, count, token, params);
@@ -2097,7 +2142,7 @@ RiPatchMesh(type,nu,uwrap,nv,vwrap, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>6) {
+	if (items<5 || items>6) {
 	    croak("Usage: RenderMan::PatchMesh(type, nu, uwrap, nv, vwrap, {params})");
 	    return;
 	}
@@ -2107,7 +2152,7 @@ RiPatchMesh(type,nu,uwrap,nv,vwrap, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(5), &token, &params);
+	count = build_token_params(ST(5), &token, &params, "PatchMesh", "6 (params)");
 
 	if (count) {
             RiPatchMeshV(type, nu, uwrap, nv, vwrap, count, token, params);
@@ -2138,13 +2183,13 @@ RiNuPatch(nu,uorder,uknot,umin,umax,nv,vorder,vknot,vmin,vmax, ...)
 	RtFloat* my_uknot;
 	RtFloat* my_vknot;
 
-	if (items>11) {
+	if (items<10 || items>11) {
 	    croak("Usage: RenderMan::NuPatch(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, {params})");
 	    return;
 	}
 
-	my_uknot = get_RtFloat_array(nu+uorder, ST(2));
-	my_vknot = get_RtFloat_array(nv+vorder, ST(7));
+	my_uknot = get_RtFloat_array(nu+uorder, ST(2), "NuPatch", "3 (uknot)");
+	my_vknot = get_RtFloat_array(nv+vorder, ST(7), "NuPatch", "8 (vknot)");
 
 	if (items == 10) {
 	    RiNuPatch(nu, uorder, my_uknot, umin, umax, nv, vorder, my_vknot, vmin, vmax, RI_NULL);
@@ -2154,7 +2199,7 @@ RiNuPatch(nu,uorder,uknot,umin,umax,nv,vorder,vknot,vmin,vmax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(10), &token, &params);
+	count = build_token_params(ST(10), &token, &params, "NuPatch", "11 (params)");
 
 	if (count) {
             RiNuPatchV(nu, uorder, my_uknot, umin, umax, nv, vorder, my_vknot, vmin, vmax, count, token, params);
@@ -2193,20 +2238,24 @@ RiTrimCurve(nloops,ncurves,order,knot,amin,amax,n,u,v,w)
 	RtFloat* my_u;
 	RtFloat* my_v;
 	RtFloat* my_w;
-	long sum = 0;
-	long sum2 = 0;
+	long total_curves = 0;
+        long control_count = 0;
+	long knot_count = 0;
 
-	my_ncurves = get_RtInt_array(nloops, ST(1));
-	for (count=nloops; count--; ) sum += my_ncurves[count];
-	my_order = get_RtInt_array(sum, ST(2));
-	my_amin  = get_RtFloat_array(sum, ST(4));
-	my_amax  = get_RtFloat_array(sum, ST(5));
-	my_n     = get_RtInt_array(sum, ST(6));
-	for (count=sum; count--; ) sum2 += (my_order[count] + my_n[count]);
-	my_u     = get_RtFloat_array(sum, ST(7));
-	my_v     = get_RtFloat_array(sum, ST(8));
-	my_w     = get_RtFloat_array(sum, ST(9));
-	my_knot  = get_RtFloat_array(sum2, ST(3));
+	my_ncurves = get_RtInt_array(nloops, ST(1), "TrimCurve", "2 (ncurves)");
+	for (count=nloops; count--; ) total_curves += my_ncurves[count];
+	my_order = get_RtInt_array(total_curves, ST(2), "TrimCurve", "3 (order)");
+	my_amin  = get_RtFloat_array(total_curves, ST(4), "TrimCurve", "5 (amin)");
+	my_amax  = get_RtFloat_array(total_curves, ST(5), "TrimCurve", "6 (amax)");
+	my_n     = get_RtInt_array(total_curves, ST(6), "TrimCurve", "7 (n)");
+	for (count=total_curves; count--; ) {
+            control_count += my_n[count];
+            knot_count += (my_order[count] + my_n[count]);
+        }
+	my_u     = get_RtFloat_array(control_count, ST(7), "TrimCurve", "8 (u)");
+	my_v     = get_RtFloat_array(control_count, ST(8), "TrimCurve", "9 (v)");
+	my_w     = get_RtFloat_array(control_count, ST(9), "TrimCurve", "10 (w)");
+	my_knot  = get_RtFloat_array(knot_count, ST(3), "TrimCurve", "4 (knot)");
 
 	RiTrimCurve(nloops, my_ncurves, my_order, my_knot, my_amin, my_amax, my_n, my_u, my_v, my_w);
 
@@ -2234,7 +2283,7 @@ RiSphere(radius,zmin,zmax,thetamax, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>5) {
+	if (items<4 || items>5) {
 	    croak("Usage: RenderMan::Sphere(radius, zmin, zmax, thetamax, {params})");
 	    return;
 	}
@@ -2244,7 +2293,7 @@ RiSphere(radius,zmin,zmax,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(4), &token, &params);
+	count = build_token_params(ST(4), &token, &params, "Sphere", "5 (params)");
 
 	if (count) {
             RiSphereV(radius, zmin, zmax, thetamax, count, token, params);
@@ -2266,7 +2315,7 @@ RiCone(height,radius,thetamax, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>4) {
+	if (items<3 || items>4) {
 	    croak("Usage: RenderMan::Cone(height, radius, thetamax, {params})");
 	    return;
 	}
@@ -2276,7 +2325,7 @@ RiCone(height,radius,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(3), &token, &params);
+	count = build_token_params(ST(3), &token, &params, "Cone", "4 (params)");
 
 	if (count) {
             RiConeV(height, radius, thetamax, count, token, params);
@@ -2299,7 +2348,7 @@ RiCylinder(radius,zmin,zmax,thetamax, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>5) {
+	if (items<4 || items>5) {
 	    croak("Usage: RenderMan::Cylinder(radius, zmin, zmax, thetamax, {params})");
 	    return;
 	}
@@ -2309,7 +2358,7 @@ RiCylinder(radius,zmin,zmax,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(4), &token, &params);
+	count = build_token_params(ST(4), &token, &params, "Cylinder", "5 (params)");
 
 	if (count) {
             RiCylinderV(radius, zmin, zmax, thetamax, count, token, params);
@@ -2332,13 +2381,13 @@ RiHyperboloid(point1,point2,thetamax, ...)
 	RtPointer* params = 0;
 	RtPoint p1, p2;
 
-	if (items>4) {
+	if (items<3 || items>4) {
 	    croak("Usage: RenderMan::Hyperboloid(point1, point2, thetamax, {params})");
 	    return;
 	}
 
-	get_RtPoint(&p1, ST(0));
-	get_RtPoint(&p2, ST(1));
+	get_RtPoint(&p1, ST(0), "Hyperboloid", "1 (point1)");
+	get_RtPoint(&p2, ST(1), "Hyperboloid", "2 (point2)");
 
 	if (items == 3) {
 	    RiHyperboloid(p1, p2, thetamax, RI_NULL);
@@ -2346,7 +2395,7 @@ RiHyperboloid(point1,point2,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(3), &token, &params);
+	count = build_token_params(ST(3), &token, &params, "Hyperboloid", "4 (params)");
 
 	if (count) {
             RiHyperboloidV(p1, p2, thetamax, count, token, params);
@@ -2369,7 +2418,7 @@ RiParaboloid(rmax,zmin,zmax,thetamax, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>5) {
+	if (items<4 || items>5) {
 	    croak("Usage: RenderMan::Paraboloid(rmax, zmin, zmax, thetamax, {params})");
 	    return;
 	}
@@ -2379,7 +2428,7 @@ RiParaboloid(rmax,zmin,zmax,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(4), &token, &params);
+	count = build_token_params(ST(4), &token, &params, "Paraboloid", "5 (params)");
 
 	if (count) {
             RiParaboloidV(rmax, zmin, zmax, thetamax, count, token, params);
@@ -2401,7 +2450,7 @@ RiDisk(height,radius,thetamax, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>4) {
+	if (items<3 || items>4) {
 	    croak("Usage: RenderMan::Disk(height, radius, thetamax, {params})");
 	    return;
 	}
@@ -2411,7 +2460,7 @@ RiDisk(height,radius,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(3), &token, &params);
+	count = build_token_params(ST(3), &token, &params, "Disk", "4 (params)");
 
 	if (count) {
             RiDiskV(height, radius, thetamax, count, token, params);
@@ -2435,7 +2484,7 @@ RiTorus(majorrad,minorrad,phimin,phimax,thetamax, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>6) {
+	if (items<5 || items>6) {
 	    croak("Usage: RenderMan::Torus(majorrad, minorrad, phimin, phimax, thetamax, {params})");
 	    return;
 	}
@@ -2445,7 +2494,7 @@ RiTorus(majorrad,minorrad,phimin,phimax,thetamax, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(5), &token, &params);
+	count = build_token_params(ST(5), &token, &params, "Torus", "6 (params)");
 
 	if (count) {
             RiTorusV(majorrad, minorrad, phimin, phimax, thetamax, count, token, params);
@@ -2454,6 +2503,50 @@ RiTorus(majorrad,minorrad,phimin,phimax,thetamax, ...)
 	}
 	free_token_params(count, token, params);
     }
+
+# RC p.??? - DONE
+void
+RiCurves(degree,ncurves,nverts,wrap, ...)
+    RtToken     degree
+    RtInt       ncurves
+    SV*         nverts
+    RtToken     wrap
+    CODE:
+    {
+	RtInt count = 0;
+	RtToken* token = 0;
+	RtPointer* params = 0;
+	RtInt *my_nverts = 0;
+
+	if (items<4 || items>5) {
+	    croak("Usage: RenderMan::Curves(degree, ncurves, nverts, wrap, {params})");
+	    return;
+	}
+
+        warn("RiCurves/RiCurvesV not implemented in BMRT 2.3.6b");
+        return;
+
+#BMRT2.3.6b	  my_nverts = get_RtInt_array(ncurves, ST(2), "Curves", "3 (nverts)");
+#BMRT2.3.6b
+#BMRT2.3.6b	  if (items == 4) {
+#BMRT2.3.6b	      RiCurves(degree, ncurves, my_nverts, wrap, RI_NULL);
+#BMRT2.3.6b	      free(my_nverts);
+#BMRT2.3.6b	      return;
+#BMRT2.3.6b	  }
+#BMRT2.3.6b
+#BMRT2.3.6b	  # Optional Parameters...
+#BMRT2.3.6b	  count = build_token_params(ST(4), &token, &params, "Curves", "5 (params)");
+#BMRT2.3.6b
+#BMRT2.3.6b	  if (count) {
+#BMRT2.3.6b	      RiCurvesV(degree, ncurves, my_nverts, wrap, count, token, params);
+#BMRT2.3.6b	  } else {
+#BMRT2.3.6b	      RiCurves(degree, ncurves, my_nverts, wrap, RI_NULL);
+#BMRT2.3.6b	  }
+#BMRT2.3.6b	  free(my_nverts);
+#BMRT2.3.6b	  free_token_params(count, token, params);
+    }
+
+# RiProcedural - not supported (yet)
 
 # RC p.???
 void
@@ -2465,7 +2558,7 @@ RiGeometry(type, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>2) {
+	if (items<1 || items>2) {
 	    croak("Usage: RenderMan::Geometry(type, {params})");
 	    return;
 	}
@@ -2475,7 +2568,7 @@ RiGeometry(type, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(1), &token, &params);
+	count = build_token_params(ST(1), &token, &params, "Geometry", "2 (params)");
 
 	if (count) {
             RiGeometryV(type, count, token, params);
@@ -2527,13 +2620,17 @@ RiMotionBegin(N, ...)
     {
 	RtFloat* times;
 	long count;
+	if (items<1) {
+	    croak("Usage: RenderMan::MotionBegin(N, ...)");
+	    return;
+	}
 	if (items == 2 && N > 1) {
-	    times = get_RtFloat_array(N, ST(1));
+	    times = get_RtFloat_array(N, ST(1), "MotionBegin", "2 (times)");
 	} else {
 	    if (!(times = (RtFloat*)malloc(N*sizeof(RtFloat))))
 		croak("Out of memory in MotionBegin");
 	    for (count=0; count<N; count++)
-	      times[count] = get_RtFloat_from_sv(ST(1+count));
+	      times[count] = get_RtFloat_from_sv(ST(1+count), "MotionBegin", "(time)");
 	}
 	RiMotionBeginV(N, times);
 	free(times);
@@ -2559,7 +2656,7 @@ RiMakeTexture(pic,tex,swrap,twrap,filterfunc,swidth,twidth, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>8) {
+	if (items<7 || items>8) {
 	    croak("Usage: RenderMan::MakeTexture(pic,tex,swrap,twrap,filterfunc,swidth,twidth,{params})");
 	    return;
 	}
@@ -2569,7 +2666,7 @@ RiMakeTexture(pic,tex,swrap,twrap,filterfunc,swidth,twidth, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(7), &token, &params);
+	count = build_token_params(ST(7), &token, &params, "MakeTexture", "8 (params)");
 
 	if (count) {
             RiMakeTextureV(pic,tex,swrap,twrap,filterfunc,swidth,twidth,count,token,params);
@@ -2595,7 +2692,7 @@ RiMakeBump(pic,tex,swrap,twrap,filterfunc,swidth,twidth, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>8) {
+	if (items<7 || items>8) {
 	    croak("Usage: RenderMan::MakeBump(pic,tex,swrap,twrap,filterfunc,swidth,twidth,{params})");
 	    return;
 	}
@@ -2605,7 +2702,7 @@ RiMakeBump(pic,tex,swrap,twrap,filterfunc,swidth,twidth, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(7), &token, &params);
+	count = build_token_params(ST(7), &token, &params, "MakeBump", "8 (params)");
 
 	if (count) {
             RiMakeBumpV(pic,tex,swrap,twrap,filterfunc,swidth,twidth,count,token,params);
@@ -2629,7 +2726,7 @@ RiMakeLatLongEnvironment(pic,tex,filterfunc,swidth,twidth, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>6) {
+	if (items<5 || items>6) {
 	    croak("Usage: RenderMan::MakeLatLongEnvironment(pic,tex,filterfunc,swidth,twidth,{params})");
 	    return;
 	}
@@ -2639,7 +2736,7 @@ RiMakeLatLongEnvironment(pic,tex,filterfunc,swidth,twidth, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(5), &token, &params);
+	count = build_token_params(ST(5), &token, &params, "MakeLatLongEnvironment", "6 (params)");
 
 	if (count) {
             RiMakeLatLongEnvironmentV(pic,tex,filterfunc,swidth,twidth,count,token,params);
@@ -2669,7 +2766,7 @@ RiMakeCubeFaceEnvironment(px,nx,py,ny,pz,nz,tex,fov,filterfunc,swidth,twidth, ..
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>12) {
+	if (items<11 || items>12) {
 	    croak("Usage: RenderMan::MakeCubeFaceEnvironment(px,nx,py,ny,pz,nz,tex,fov,filterfunc,swidth,twidth,{params})");
 	    return;
 	}
@@ -2679,7 +2776,7 @@ RiMakeCubeFaceEnvironment(px,nx,py,ny,pz,nz,tex,fov,filterfunc,swidth,twidth, ..
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(11), &token, &params);
+	count = build_token_params(ST(11), &token, &params, "MakeCubeFaceEnvironment", "12 (params)");
 
 	if (count) {
             RiMakeCubeFaceEnvironmentV(px,nx,py,ny,pz,nz,tex,fov,filterfunc,swidth,twidth,count,token,params);
@@ -2700,7 +2797,7 @@ RiMakeShadow(pic,tex, ...)
 	RtToken* token = 0;
 	RtPointer* params = 0;
 
-	if (items>3) {
+	if (items<2 || items>3) {
 	    croak("Usage: RenderMan::MakeShadow(pic, tex, {params})");
 	    return;
 	}
@@ -2710,7 +2807,7 @@ RiMakeShadow(pic,tex, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(2), &token, &params);
+	count = build_token_params(ST(2), &token, &params, "MakeShadow", "3 (params)");
 
 	if (count) {
             RiMakeShadowV(pic, tex, count, token, params);
@@ -2746,7 +2843,7 @@ RiErrorAbort(code,severity,message)
     RtInt	severity
     char*	message
 
-# RC p.???
+# RC p.??? - DONE
 void
 RiArchiveRecord(type,format, ...)
     RtToken	type
@@ -2764,17 +2861,48 @@ RiArchiveRecord(type,format, ...)
 	}
 
 	# Optional Parameters...
-	count = build_token_params(ST(2), &token, &params);
+	count = build_token_params(ST(2), &token, &params, "ArchiveRecord", "3 (params)");
 
 	if (count) {
-	    warn("RiArchiveRecordV not implemented in BMRT 2.3.4");
-/*            RiArchiveRecordV(type, format, count, token, params); */
+/*	    warn("RiArchiveRecordV not implemented in BMRT 2.3.4"); */
+            RiArchiveRecordV(type, format, count, token, params);
 	} else {
 	    RiArchiveRecord(type, format, RI_NULL);
 	}
 	free_token_params(count, token, params);
     }
 
+# New functions not listed in the RenderMan Interface Specification,
+# but found at www.pixar.com in their PhotoRealistic RenderMan online
+# User's Manual...
+
+# RC p.??? - DONE
+void
+RiReadArchive(filename, ...)
+    char* filename
+    CODE:
+    {
+	RtInt count = 0;
+	RtToken* token = 0;
+	RtPointer* params = 0;
+
+	if (items == 1) { RiReadArchive(filename, RI_NULL, RI_NULL); return; }
+	if (items != 2) {
+	    croak("Usage: RenderMan::ReadArchive(filename, {params})");
+	    return;
+	}
+
+	# Optional Parameters...
+	count = build_token_params(ST(1), &token, &params, "ReadArchive", "2 (params)");
+
+	if (count) {
+	    warn("RiReadArchiveV not implemented in BMRT 2.3.6b");
+/*          RiReadArchiveV(filename, RI_NULL, count, token, params); */
+	} else {
+	    RiReadArchive(filename, RI_NULL, RI_NULL);
+	}
+	free_token_params(count, token, params);
+    }
 
 ######################################################################
 ######################################################################

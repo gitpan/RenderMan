@@ -143,6 +143,11 @@ require AutoLoader;
 	RI_WORLD
 	RI_Z
 
+	RI_LINEAR
+	RI_CUBIC
+	RI_WIDTH
+	RI_CONSTANTWIDTH
+
 	BSplineBasis
 	BezierBasis
 	CatmullRomBasis
@@ -234,6 +239,7 @@ require AutoLoader;
 	Paraboloid
 	Disk
 	Torus
+	Curves
 	Geometry
 	SolidBegin
 	SolidEnd
@@ -252,8 +258,9 @@ require AutoLoader;
 	ErrorPrint
 	ErrorAbort
 	ArchiveRecord
+	ReadArchive
 );
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 bootstrap RenderMan $VERSION;
 
@@ -323,6 +330,7 @@ This RenderMan module implements a Perl 5 binding for the BMRT client library
 Therefore, this module has the following limitations:
 Error Handling callbacks are not implemented, Filter function callbacks are
 not implemented, and the TransformPoints function does nothing.
+RiCurves is not supported in BMRT2.3.6b either.
 
 The full RenderMan specification is way beyond the scope of this man page.
 Please refer to "The RenderMan Companion" by Steve Upstill.
@@ -339,6 +347,11 @@ You will typically want to run your RenderMan Perl script and pipe the
 results into any RenderMan-compliant renderer, such as "rgl", "rendribv",
 or "rendrib", which all come with the excellent BMRT backage by Larry Gritz.
 
+If using the WinNT version of BMRT, you can specify a filename, "rgl" or "rendrib"
+as the argument to Begin(); and the output will be sent to a file or automatically
+piped to "rgl" or "rendrib" since the piping mechanism (and general functionality)
+of WinNT's command line parser is, uh, limited.
+
 =head1 AUTHOR
 
 Glenn M. Lewis, mailto:glenn@gmlewis.com, http://www.gmlewis.com/
@@ -350,6 +363,8 @@ http://www.seas.gwu.edu/student/gritz/bmrt.html
 
 The RenderMan Companion: A Programmer's Guide to Realistic Computer Graphics
 by Steve Upstill, published by Addison Wesley.  ISBN 0-201-50868-0.
+
+The RenderMan Interface, Version 3.1, September 1989, Pixar.
 
 RenderMan is a registered trademark of Pixar.
 http://www.pixar.com/
