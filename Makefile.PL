@@ -6,11 +6,11 @@ WriteMakefile(
     'VERSION_FROM' => 'RenderMan.pm', # finds $VERSION
     # Please change the 'LIBS' line to point to where your BMRT lib is:
     # 'LIBS'	=> ['-L/usr/local/lib -lribout'],                  #Unix
-    'LIBS'	=> ['d:/BMRT2.3.6/lib/VisualC++/libriboutMD.lib'], #WinNT
+    'LIBS'	=> ['f:/BMRT2.5/lib/libribout.lib'], #WinNT
     # If compiling for WinNT, you will need this:
     'LDDLFLAGS' => '-dll -nologo -nodefaultlib:libc -release -machine:x86',  #WinNT
     'DEFINE'	=> '',
     # Please change the 'INC' line to point to where your BMRT ri.h is:
     # 'INC'	=> '-I/usr/local/include',    #Unix
-    'INC'	=> '-Id:/BMRT2.3.6/include',  #WinNT
+    'INC'	=> '-If:/BMRT2.5/include',  #WinNT
 );

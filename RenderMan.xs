@@ -10,8 +10,8 @@ extern "C" {
 
 #include "ri.h"
 
-#define XS_unpack_RtTokenPtr(b) ((RtToken*)SvPV(b,na))
-#define XS_unpack_RtPointerPtr(b) ((RtPointer*)SvPV(b,na))
+#define XS_unpack_RtTokenPtr(b) ((RtToken*)SvPV_nolen(b))
+#define XS_unpack_RtPointerPtr(b) ((RtPointer*)SvPV_nolen(b))
 
 RtInt get_RtInt_from_array(AV* array, int index, char* funcname, char* paramname)
 {
@@ -119,6 +119,43 @@ RtFloat* get_RtFloat_array(RtInt nloops, SV* svp, char* funcname, char* paramnam
               funcname, paramname);
     for (count=0; count<=av_len(array); count++)
 	val[count] = get_RtFloat_from_array(array, count, funcname, paramname);
+    return(val);
+}
+
+RtToken get_RtToken_from_array(AV* array, int index, char* funcname, char* paramname)
+{
+  char* val = 0;
+  SV* sv = *av_fetch(array, index, FALSE);
+  if (SvPOK(sv)) {
+    val = strdup(SvPV_nolen(sv));
+  } else {
+    croak("%s parameter %s array element #%d is not an RtToken",
+          funcname, paramname, index);
+  }
+  return(val);
+}
+
+RtToken* get_RtToken_array(RtInt nloops, SV* svp, char* funcname, char* paramname)
+{
+    AV* array;
+    long count;
+    RtToken* val = 0;
+    if (!SvROK(svp))
+	croak("%s parameter %s is not a reference to a %d-element array of RtToken",
+              funcname, paramname, nloops);
+    array = (AV*)SvRV(svp);
+    if (SvTYPE(array) != SVt_PVAV)
+	croak("%s parameter %s is not a reference to a %d-element array of RtToken",
+              funcname, paramname, nloops);
+    if (1 + av_len(array) != nloops)
+	croak("%s parameter %s RtToken array length should be %d but is %d",
+              funcname, paramname,
+	      nloops, 1 + av_len(array));
+    if (!(val = (RtToken*)malloc(nloops*sizeof(RtToken))))
+	croak("Out of memory in get_RtToken_array for function %s, parameter %s",
+              funcname, paramname);
+    for (count=0; count<=av_len(array); count++)
+	val[count] = get_RtToken_from_array(array, count, funcname, paramname);
     return(val);
 }
 
@@ -248,7 +285,7 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
   int len;
 
   if (SvPOK(svp)) {
-      key = SvPV(svp, na);
+      key = SvPV_nolen(svp);
       if (key && key[0])
 	  croak("Parameter list is not a hash reference or RI_NULL");
   } else {
@@ -283,7 +320,7 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
 	      /* warn("WARNING: ignoring hash key '%s'...type is double value: %g", key, SvNV(sv)); */
 	  } else if (SvPOK(sv)) {  /* string */
 	      token[count] = key;
-	      params[count] = (RtPointer)strdup(SvPV(sv, na));
+	      params[count] = (RtPointer)strdup(SvPV_nolen(sv));
 	      count++;
 	  } else if (SvROK(sv)) {  /* reference */
 	      if (SvTYPE(SvRV(sv)) == SVt_IV) {
@@ -304,7 +341,7 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
 		  /* warn("WARNING: ignoring hash key '%s'...type is a reference to a double scalar", key); */
 	      } else if (SvTYPE(SvRV(sv)) == SVt_PV) {
 		  token[count] = key;
-		  params[count] = (RtPointer)strdup(SvPV(SvRV(sv), na));
+		  params[count] = (RtPointer)strdup(SvPV_nolen(SvRV(sv)));
 		  count++;
 		  /* warn("WARNING: ignoring hash key '%s'...type is a reference to a string scalar", key); */
 	      } else if (SvTYPE(SvRV(sv)) == SVt_RV) {
@@ -974,6 +1011,74 @@ RI_CONSTANTWIDTH()
     OUTPUT:
     RETVAL
 
+RtToken
+RI_CURRENT()
+    CODE:
+    RETVAL = RI_CURRENT;
+    OUTPUT:
+    RETVAL
+
+# Duplicate
+# RtToken
+# RI_WORLD()
+#     CODE:
+#     RETVAL = RI_WORLD;
+#     OUTPUT:
+#     RETVAL
+
+# Duplicate
+# RtToken
+# RI_OBJECT()
+#     CODE:
+#     RETVAL = RI_OBJECT;
+#     OUTPUT:
+#     RETVAL
+
+RtToken
+RI_SHADER()
+    CODE:
+    RETVAL = RI_SHADER;
+    OUTPUT:
+    RETVAL
+
+# Duplicate
+# RtToken
+# RI_RASTER()
+#     CODE:
+#     RETVAL = RI_RASTER;
+#     OUTPUT:
+#     RETVAL
+
+RtToken
+RI_NDC()
+    CODE:
+    RETVAL = RI_NDC;
+    OUTPUT:
+    RETVAL
+
+# Duplicate
+# RtToken
+# RI_SCREEN()
+#     CODE:
+#     RETVAL = RI_SCREEN;
+#     OUTPUT:
+#     RETVAL
+
+# Duplicate
+# RtToken
+# RI_CAMERA()
+#     CODE:
+#     RETVAL = RI_CAMERA;
+#     OUTPUT:
+#     RETVAL
+
+RtToken
+RI_EYE()
+    CODE:
+    RETVAL = RI_EYE;
+    OUTPUT:
+    RETVAL
+
 ######################################################################
 
 void
@@ -1127,7 +1232,7 @@ RiBegin(...)
 	    croak("Usage: RenderMan::Begin([name])");
 	    return;
 	}
-	name = (char*)SvPV(ST(0), na);
+	name = (char*)SvPV_nolen(ST(0));
 	if (!name || !name[0])
 	    RiBegin(RI_NULL);
 	else
@@ -2504,48 +2609,6 @@ RiTorus(majorrad,minorrad,phimin,phimax,thetamax, ...)
 	free_token_params(count, token, params);
     }
 
-# RC p.??? - DONE
-void
-RiCurves(degree,ncurves,nverts,wrap, ...)
-    RtToken     degree
-    RtInt       ncurves
-    SV*         nverts
-    RtToken     wrap
-    CODE:
-    {
-	RtInt count = 0;
-	RtToken* token = 0;
-	RtPointer* params = 0;
-	RtInt *my_nverts = 0;
-
-	if (items<4 || items>5) {
-	    croak("Usage: RenderMan::Curves(degree, ncurves, nverts, wrap, {params})");
-	    return;
-	}
-
-        warn("RiCurves/RiCurvesV not implemented in BMRT 2.3.6b");
-        return;
-
-#BMRT2.3.6b	  my_nverts = get_RtInt_array(ncurves, ST(2), "Curves", "3 (nverts)");
-#BMRT2.3.6b
-#BMRT2.3.6b	  if (items == 4) {
-#BMRT2.3.6b	      RiCurves(degree, ncurves, my_nverts, wrap, RI_NULL);
-#BMRT2.3.6b	      free(my_nverts);
-#BMRT2.3.6b	      return;
-#BMRT2.3.6b	  }
-#BMRT2.3.6b
-#BMRT2.3.6b	  # Optional Parameters...
-#BMRT2.3.6b	  count = build_token_params(ST(4), &token, &params, "Curves", "5 (params)");
-#BMRT2.3.6b
-#BMRT2.3.6b	  if (count) {
-#BMRT2.3.6b	      RiCurvesV(degree, ncurves, my_nverts, wrap, count, token, params);
-#BMRT2.3.6b	  } else {
-#BMRT2.3.6b	      RiCurves(degree, ncurves, my_nverts, wrap, RI_NULL);
-#BMRT2.3.6b	  }
-#BMRT2.3.6b	  free(my_nverts);
-#BMRT2.3.6b	  free_token_params(count, token, params);
-    }
-
 # RiProcedural - not supported (yet)
 
 # RC p.???
@@ -2577,6 +2640,201 @@ RiGeometry(type, ...)
 	}
 	free_token_params(count, token, params);
     }
+
+# RC p.??? - DONE
+void
+RiCurves(degree,ncurves,nverts,wrap, ...)
+    RtToken     degree
+    RtInt       ncurves
+    SV*         nverts
+    RtToken     wrap
+    CODE:
+    {
+	RtInt count = 0;
+	RtToken* token = 0;
+	RtPointer* params = 0;
+	RtInt *my_nverts = 0;
+
+	if (items<4 || items>5) {
+	    croak("Usage: RenderMan::Curves(degree, ncurves, nverts, wrap, {params})");
+	    return;
+	}
+
+        my_nverts = get_RtInt_array(ncurves, ST(2), "Curves", "3 (nverts)");
+
+        if (items == 4) {
+            RiCurves(degree, ncurves, my_nverts, wrap, RI_NULL);
+            free(my_nverts);
+            return;
+        }
+
+        # Optional Parameters...
+        count = build_token_params(ST(4), &token, &params, "Curves", "5 (params)");
+
+        if (count) {
+            RiCurvesV(degree, ncurves, my_nverts, wrap, count, token, params);
+        } else {
+            RiCurves(degree, ncurves, my_nverts, wrap, RI_NULL);
+        }
+        free(my_nverts);
+	free_token_params(count, token, params);
+    }
+
+# RC p.??? - DONE
+void
+RiPoints(npts, ...)
+    RtInt       npts
+    CODE:
+    {
+	RtInt count = 0;
+	RtToken* token = 0;
+	RtPointer* params = 0;
+
+	if (items<1 || items>2) {
+	    croak("Usage: RenderMan::Points(npts, {params})");
+	    return;
+	}
+
+        if (items == 1) {
+            RiPoints(npts, RI_NULL);
+            return;
+        }
+
+        # Optional Parameters...
+        count = build_token_params(ST(1), &token, &params, "Points", "2 (params)");
+
+        if (count) {
+            RiPointsV(npts, count, token, params);
+        } else {
+            RiPoints(npts, RI_NULL);
+        }
+        free_token_params(count, token, params);
+    }
+
+# RC p.??? - DONE
+void
+RiSubdivisionMesh(scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, ...)
+    RtToken     scheme
+    RtInt       nfaces
+    SV*         nvertices
+    SV*         vertices
+    RtInt       ntags
+    SV*         tags
+    SV*         nargs
+    SV*         intargs
+    SV*         floatargs
+    CODE:
+    {
+	RtInt count = 0;
+	RtToken* token = 0;
+	RtPointer* params = 0;
+        RtInt* my_nvertices = 0;
+	long sum = 0;
+        RtInt* my_vertices = 0;
+        RtToken* my_tags = 0;
+        RtInt* my_nargs = 0;
+        long intsum = 0;
+        long floatsum = 0;
+        RtInt* my_intargs = 0;
+        RtFloat* my_floatargs = 0;
+
+	if (items<9 || items>10) {
+	    croak("Usage: RenderMan::SubdivisionMesh(scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, {params})");
+	    return;
+	}
+
+	my_nvertices = get_RtInt_array(nfaces, ST(2), "SubdivisionMesh", "3 (nvertices)");
+	for (count=nfaces; count--; ) sum += my_nvertices[count];
+	my_vertices = get_RtInt_array(sum, ST(3), "SubdivisionMesh", "4 (vertices)");
+	my_tags = get_RtToken_array(ntags, ST(5), "SubdivisionMesh", "6 (tags)");
+	my_nargs = get_RtInt_array(ntags*2, ST(6), "SubdivisionMesh", "7 (nargs)");
+	for (count=0; count < 2*ntags; count++) {
+          intsum += my_nargs[count];
+          count++;
+          floatsum += my_nargs[count];
+        }
+	my_intargs = get_RtInt_array(intsum, ST(7), "SubdivisionMesh", "8 (intargs)");
+	my_floatargs = get_RtFloat_array(floatsum, ST(8), "SubdivisionMesh", "9 (floatargs)");
+
+        if (items == 9) {
+            RiSubdivisionMesh(scheme, nfaces, my_nvertices, my_vertices, ntags, my_tags, my_nargs, my_intargs, my_floatargs, RI_NULL);
+            free(my_nvertices);
+            free(my_vertices);
+            free(my_tags);
+            free(my_nargs);
+            free(my_intargs);
+            free(my_floatargs);
+            return;
+        }
+
+        # Optional Parameters...
+        count = build_token_params(ST(9), &token, &params, "SubdivisionMesh", "10 (params)");
+
+        if (count) {
+            RiSubdivisionMeshV(scheme, nfaces, my_nvertices, my_vertices, ntags, my_tags, my_nargs, my_intargs, my_floatargs, count, token, params);
+        } else {
+            RiSubdivisionMesh(scheme, nfaces, my_nvertices, my_vertices, ntags, my_tags, my_nargs, my_intargs, my_floatargs, RI_NULL);
+        }
+        free_token_params(count, token, params);
+        free(my_nvertices);
+        free(my_vertices);
+        free(my_tags);
+        free(my_nargs);
+        free(my_intargs);
+        free(my_floatargs);
+    }
+
+
+#BMRT2.5.0.8 BMRT 2.5.0.8 does not yet support Blobby
+#BMRT2.5.0.8 # RC p.??? - DONE
+#BMRT2.5.0.8 void
+#BMRT2.5.0.8 RiBlobby(nleaf, ncode, code, nflt, flt, nstr, str, ...)
+#BMRT2.5.0.8     RtInt     nleaf
+#BMRT2.5.0.8     RtInt     ncode
+#BMRT2.5.0.8     SV*       code
+#BMRT2.5.0.8     RtInt     nflt
+#BMRT2.5.0.8     SV*       flt
+#BMRT2.5.0.8     RtInt     nstr
+#BMRT2.5.0.8     SV*       str
+#BMRT2.5.0.8     CODE:
+#BMRT2.5.0.8     {
+#BMRT2.5.0.8         RtInt count = 0;
+#BMRT2.5.0.8         RtToken* token = 0;
+#BMRT2.5.0.8         RtPointer* params = 0;
+#BMRT2.5.0.8         RtInt* my_code = 0;
+#BMRT2.5.0.8         RtFloat* my_flt = 0;
+#BMRT2.5.0.8         RtToken* my_str = 0;
+#BMRT2.5.0.8 
+#BMRT2.5.0.8         if (items<7 || items>8) {
+#BMRT2.5.0.8             croak("Usage: RenderMan::Blobby(nleaf, ncode, code, nflt, flt, nstr, str, {params})");
+#BMRT2.5.0.8             return;
+#BMRT2.5.0.8         }
+#BMRT2.5.0.8 
+#BMRT2.5.0.8         my_code = get_RtInt_array(ncode, ST(2), "Blobby", "3 (code)");
+#BMRT2.5.0.8         my_flt = get_RtFloat_array(nflt, ST(4), "Blobby", "5 (flt)");
+#BMRT2.5.0.8         my_str = get_RtToken_array(nstr, ST(6), "Blobby", "7 (str)");
+#BMRT2.5.0.8 
+#BMRT2.5.0.8         if (items == 7) {
+#BMRT2.5.0.8             RiBlobby(nleaf, ncode, my_code, nflt, my_flt, nstr, my_str, RI_NULL);
+#BMRT2.5.0.8             free(my_code);
+#BMRT2.5.0.8             free(my_flt);
+#BMRT2.5.0.8             free(my_str);
+#BMRT2.5.0.8             return;
+#BMRT2.5.0.8         }
+#BMRT2.5.0.8 
+#BMRT2.5.0.8         # Optional Parameters...
+#BMRT2.5.0.8         count = build_token_params(ST(7), &token, &params, "Blobby", "8 (params)");
+#BMRT2.5.0.8 
+#BMRT2.5.0.8         if (count) {
+#BMRT2.5.0.8             RiBlobbyV(nleaf, ncode, my_code, nflt, my_flt, nstr, my_str, count, token, params);
+#BMRT2.5.0.8         } else {
+#BMRT2.5.0.8             RiBlobby(nleaf, ncode, my_code, nflt, my_flt, nstr, my_str, RI_NULL);
+#BMRT2.5.0.8         }
+#BMRT2.5.0.8         free_token_params(count, token, params);
+#BMRT2.5.0.8         free(my_code);
+#BMRT2.5.0.8         free(my_flt);
+#BMRT2.5.0.8         free(my_str);
+#BMRT2.5.0.8     }
 
 # RC p.126 - DONE
 void

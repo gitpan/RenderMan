@@ -148,6 +148,16 @@ require AutoLoader;
 	RI_WIDTH
 	RI_CONSTANTWIDTH
 
+	RI_CURRENT
+	RI_WORLD
+	RI_OBJECT
+	RI_SHADER
+	RI_RASTER
+	RI_NDC
+	RI_SCREEN
+	RI_CAMERA
+	RI_EYE
+        
 	BSplineBasis
 	BezierBasis
 	CatmullRomBasis
@@ -239,8 +249,14 @@ require AutoLoader;
 	Paraboloid
 	Disk
 	Torus
-	Curves
 	Geometry
+	Curves
+	Points
+	SubdivisionMesh
+	Blobby
+	ProcDelayedReadArchive
+	ProcRunProgram
+	ProcDynamicLoad
 	SolidBegin
 	SolidEnd
 	ObjectBegin
@@ -317,7 +333,7 @@ __END__
 
 =head1 NAME
 
-RenderMan - A RenderMan binding as a Perl 5 module
+RenderMan - A RenderMan binding as a Perl 5.6 module
 
 =head1 SYNOPSIS
 
@@ -325,15 +341,15 @@ RenderMan - A RenderMan binding as a Perl 5 module
 
 =head1 DESCRIPTION
 
-This RenderMan module implements a Perl 5 binding for the BMRT client library
+This RenderMan module implements a Perl 5.6 binding for the BMRT client library
 (libribout).  It fully supports the client library.
 Therefore, this module has the following limitations:
 Error Handling callbacks are not implemented, Filter function callbacks are
 not implemented, and the TransformPoints function does nothing.
-RiCurves is not supported in BMRT2.3.6b either.
+Also, Blobby is not yet supported by BMRT 2.5.0.8.
 
 The full RenderMan specification is way beyond the scope of this man page.
-Please refer to "The RenderMan Companion" by Steve Upstill.
+Please refer to the documents below for more information about RenderMan.
 The Perl binding is identical to the C binding except a few minor points:
 All "parameterlist"s are passed as a reference to a hash (i.e. \%params).
 Anywhere that a function's arguments can be terminated by RI_NULL, you can
@@ -359,12 +375,17 @@ Glenn M. Lewis, mailto:glenn@gmlewis.com, http://www.gmlewis.com/
 =head1 SEE ALSO
 
 Blue Moon Rendering Toolkit (BMRT) by Larry Gritz.
-http://www.seas.gwu.edu/student/gritz/bmrt.html
+http://www.bmrt.org/
 
 The RenderMan Companion: A Programmer's Guide to Realistic Computer Graphics
 by Steve Upstill, published by Addison Wesley.  ISBN 0-201-50868-0.
 
-The RenderMan Interface, Version 3.1, September 1989, Pixar.
+Advanced RenderMan: Creating CGI for Motion Pictures
+by Anthony A. Apodaca and Larry Gritz, published by Morgan Kaufmann Publishers
+ISBN 1-55860-618-1
+
+The RenderMan Interface Specification, Version 3.2, July 2000, Pixar.
+http://www.pixar.com/products/rendermandocs/toolkit/Toolkit/
 
 RenderMan is a registered trademark of Pixar.
 http://www.pixar.com/

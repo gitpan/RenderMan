@@ -6,7 +6,7 @@
 # Change 1..1 below to 1..last_test_to_print .
 # (It may become useful if the test is moved to ./t subdirectory.)
 
-BEGIN { $| = 1; print "1..232\n"; }
+BEGIN { $| = 1; print "1..241\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use RenderMan;
 $loaded = 1;
@@ -157,12 +157,11 @@ print RenderMan::RI_NULL          ==  0 ? "ok 132" : "not ok 132", "\n";
 print RenderMan::RI_POWERSTEP     ==  4 ? "ok 133" : "not ok 133", "\n";
 print RenderMan::RI_TRUE          ==  1 ? "ok 134" : "not ok 134", "\n";
 
-$n = 135;
 # New constants as of BMRT2.3.6b...
-print RenderMan::RI_LINEAR eq "linear" ? "ok $n" : "not ok $n", "\n"; $n++;
-print RenderMan::RI_CUBIC eq "cubic" ? "ok $n" : "not ok $n", "\n"; $n++;
-print RenderMan::RI_WIDTH eq "width" ? "ok $n" : "not ok $n", "\n"; $n++;
-print RenderMan::RI_CONSTANTWIDTH eq "constantwidth" ? "ok $n" : "not ok $n", "\n"; $n++;
+print RenderMan::RI_LINEAR eq "linear" ? 'ok 135' : 'not ok 135', "\n";
+print RenderMan::RI_CUBIC eq "cubic" ? 'ok 136' : 'not ok 136', "\n";
+print RenderMan::RI_WIDTH eq "width" ? 'ok 137' : 'not ok 137', "\n";
+print RenderMan::RI_CONSTANTWIDTH eq "constantwidth" ? 'ok 138' : 'not ok 138', "\n";
 
 # Make sure that we get basic output from libribout...
 Begin("foo");
@@ -170,16 +169,16 @@ End();
 
 open TESTFILE, "<./foo";
 $bar = <TESTFILE>;
-if ($bar eq "##RenderMan RIB-Structure 1.0\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "##RenderMan RIB-Structure 1.0\n") {print "ok 139\n";} else {print "not ok 139\n";}
 $bar = <TESTFILE>;
-if ($bar eq "version 3.03\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "version 3.03\n") {print "ok 140\n";} else {print "not ok 140\n";}
 close(TESTFILE);
 unlink "./foo";
 
 # Now test the individual routines and make sure we get reasonable output...
 Begin("foo");
-  $val = Declare("Howdy", "Howdy Value");
-  if ($val eq "Howdy") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+  $val = Declare("Howdy", "float");
+  if ($val eq "Howdy") {print "ok 141\n";} else {print "not ok 141\n";}
 
   FrameBegin(27);
   FrameEnd();
@@ -217,10 +216,10 @@ Begin("foo");
   Opacity([4,5,6]);
   TextureCoordinates(1,2,3,4,5,6,7,8);
   $val = LightSource("distantlight");
-  if ($val eq "distantlight") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+  if ($val eq "distantlight") {print "ok 142\n";} else {print "not ok 142\n";}
 
   $val = AreaLightSource("arealight");
-  if ($val eq "arealight") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+  if ($val eq "arealight") {print "ok 143\n";} else {print "not ok 143\n";}
 
   Illuminate(1, 0);
   Surface("yo");
@@ -275,7 +274,7 @@ Begin("foo");
   SolidBegin("xor");
   SolidEnd();
   $val = ObjectBegin();
-  if ($val == 1) {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+  if ($val == 1) {print "ok 144\n";} else {print "not ok 144\n";}
 
   ObjectEnd();
   ObjectInstance(1);
@@ -296,181 +295,191 @@ End();
 
 open TESTFILE, "<./foo";
 $bar = <TESTFILE>;
-if ($bar eq "##RenderMan RIB-Structure 1.0\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "##RenderMan RIB-Structure 1.0\n") {print "ok 145\n";} else {print "not ok 145\n";}
 $bar = <TESTFILE>;
-if ($bar eq "version 3.03\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "version 3.03\n") {print "ok 146\n";} else {print "not ok 146\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Declare \"Howdy\" \"Howdy Value\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Declare \"Howdy\" \"float\"\n") {print "ok 147\n";} else {print "not ok 147\n";}
 $bar = <TESTFILE>;
-if ($bar eq "FrameBegin 27\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "FrameBegin 27\n") {print "ok 148\n";} else {print "not ok 148\n";}
 $bar = <TESTFILE>;
-if ($bar eq "FrameEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "FrameEnd\n") {print "ok 149\n";} else {print "not ok 149\n";}
 $bar = <TESTFILE>;
-if ($bar eq "WorldBegin\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "WorldBegin\n") {print "ok 150\n";} else {print "not ok 150\n";}
 $bar = <TESTFILE>;
-if ($bar eq "WorldEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "WorldEnd\n") {print "ok 151\n";} else {print "not ok 151\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Format 600 400 1\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Format 600 400 1\n") {print "ok 152\n";} else {print "not ok 152\n";}
 $bar = <TESTFILE>;
-if ($bar eq "FrameAspectRatio 1\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "FrameAspectRatio 1\n") {print "ok 153\n";} else {print "not ok 153\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ScreenWindow 0 1 0.1 0.9\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ScreenWindow 0 1 0.1 0.9\n") {print "ok 154\n";} else {print "not ok 154\n";}
 $bar = <TESTFILE>;
-if ($bar eq "CropWindow 0.1 0.9 0.2 0.8\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "CropWindow 0.1 0.9 0.2 0.8\n") {print "ok 155\n";} else {print "not ok 155\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Projection \"perspective\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Projection \"perspective\"\n") {print "ok 156\n";} else {print "not ok 156\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Clipping 0.5 0.8\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Clipping 0.5 0.8\n") {print "ok 157\n";} else {print "not ok 157\n";}
 $bar = <TESTFILE>;
-if ($bar eq "DepthOfField 2 20 40\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "DepthOfField 2 20 40\n") {print "ok 158\n";} else {print "not ok 158\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Shutter 0.1 0.2\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Shutter 0.1 0.2\n") {print "ok 159\n";} else {print "not ok 159\n";}
 $bar = <TESTFILE>;
-if ($bar eq "PixelVariance 0.5\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "PixelVariance 0.5\n") {print "ok 160\n";} else {print "not ok 160\n";}
 $bar = <TESTFILE>;
-if ($bar eq "PixelSamples 3 3\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "PixelSamples 3 3\n") {print "ok 161\n";} else {print "not ok 161\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Exposure 4 0.7\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Exposure 4 0.7\n") {print "ok 162\n";} else {print "not ok 162\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Imager \"imager\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Imager \"imager\"\n") {print "ok 163\n";} else {print "not ok 163\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Quantize \"quantize\" 1 2 3 4\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Quantize \"quantize\" 1 2 3 4\n") {print "ok 164\n";} else {print "not ok 164\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Display \"perltest.tif\" \"framebuffer\" \"rgba\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Display \"perltest.tif\" \"framebuffer\" \"rgba\"\n") {print "ok 165\n";} else {print "not ok 165\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Hider \"hider\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Hider \"hider\"\n") {print "ok 166\n";} else {print "not ok 166\n";}
 $bar = <TESTFILE>;
-if ($bar eq "RelativeDetail 5\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "RelativeDetail 5\n") {print "ok 167\n";} else {print "not ok 167\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Option \"testme\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Option \"testme\"\n") {print "ok 168\n";} else {print "not ok 168\n";}
 $bar = <TESTFILE>;
-if ($bar eq "AttributeBegin\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "AttributeBegin\n") {print "ok 169\n";} else {print "not ok 169\n";}
 $bar = <TESTFILE>;
-if ($bar eq "AttributeEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "AttributeEnd\n") {print "ok 170\n";} else {print "not ok 170\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Color [1 2 3]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Color [1 2 3]\n") {print "ok 171\n";} else {print "not ok 171\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Color [1 2 3]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Color [1 2 3]\n") {print "ok 172\n";} else {print "not ok 172\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Opacity [4 5 6]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Opacity [4 5 6]\n") {print "ok 173\n";} else {print "not ok 173\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Opacity [4 5 6]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Opacity [4 5 6]\n") {print "ok 174\n";} else {print "not ok 174\n";}
 $bar = <TESTFILE>;
-if ($bar eq "TextureCoordinates [ 1 2 3 4 5 6 7 8 ]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "TextureCoordinates [ 1 2 3 4 5 6 7 8 ]\n") {print "ok 175\n";} else {print "not ok 175\n";}
 $bar = <TESTFILE>;
-if ($bar eq "LightSource \"distantlight\" 1\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "LightSource \"distantlight\" 1\n") {print "ok 176\n";} else {print "not ok 176\n";}
 $bar = <TESTFILE>;
-if ($bar eq "AreaLightSource \"arealight\" 2\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "AreaLightSource \"arealight\" 2\n") {print "ok 177\n";} else {print "not ok 177\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Illuminate 1 0\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Illuminate 1 0\n") {print "ok 178\n";} else {print "not ok 178\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Surface \"yo\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Surface \"yo\"\n") {print "ok 179\n";} else {print "not ok 179\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Atmosphere \"yep\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Atmosphere \"yep\"\n") {print "ok 180\n";} else {print "not ok 180\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Interior \"uh_huh\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Interior \"uh_huh\"\n") {print "ok 181\n";} else {print "not ok 181\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Exterior \"yessirreeLarry\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Exterior \"yessirreeLarry\"\n") {print "ok 182\n";} else {print "not ok 182\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ShadingRate 2\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ShadingRate 2\n") {print "ok 183\n";} else {print "not ok 183\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ShadingInterpolation \"wave\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ShadingInterpolation \"wave\"\n") {print "ok 184\n";} else {print "not ok 184\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Matte 1\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Matte 1\n") {print "ok 185\n";} else {print "not ok 185\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Bound [1 2 3 4 5 6]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Bound [1 2 3 4 5 6]\n") {print "ok 186\n";} else {print "not ok 186\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Detail [7 8 9 1 2 3]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Detail [7 8 9 1 2 3]\n") {print "ok 187\n";} else {print "not ok 187\n";}
 $bar = <TESTFILE>;
-if ($bar eq "DetailRange 1 2 3 4\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "DetailRange 1 2 3 4\n") {print "ok 188\n";} else {print "not ok 188\n";}
 $bar = <TESTFILE>;
-if ($bar eq "GeometricApproximation \"itsybitsy\" 4\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "GeometricApproximation \"itsybitsy\" 4\n") {print "ok 189\n";} else {print "not ok 189\n";}
 $bar = <TESTFILE>;
-if ($bar eq "GeometricRepresentation \"tiny\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "GeometricRepresentation \"tiny\"\n") {print "ok 190\n";} else {print "not ok 190\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Orientation \"upsidedown\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Orientation \"upsidedown\"\n") {print "ok 191\n";} else {print "not ok 191\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ReverseOrientation\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ReverseOrientation\n") {print "ok 192\n";} else {print "not ok 192\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Sides 2\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Sides 2\n") {print "ok 193\n";} else {print "not ok 193\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Identity\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Identity\n") {print "ok 194\n";} else {print "not ok 194\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Transform [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Transform [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]\n") {print "ok 195\n";} else {print "not ok 195\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ConcatTransform [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ConcatTransform [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16]\n") {print "ok 196\n";} else {print "not ok 196\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Perspective 40\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Perspective 40\n") {print "ok 197\n";} else {print "not ok 197\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Translate 1 2 3 \n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Translate 1 2 3 \n") {print "ok 198\n";} else {print "not ok 198\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Rotate 90 1 1 1 \n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Rotate 90 1 1 1 \n") {print "ok 199\n";} else {print "not ok 199\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Scale 2 4 6\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Scale 2 4 6\n") {print "ok 200\n";} else {print "not ok 200\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Skew 30   1 2 3   4 5 6\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Skew 30   1 2 3   4 5 6\n") {print "ok 201\n";} else {print "not ok 201\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Deformation \"deform\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Deformation \"deform\"\n") {print "ok 202\n";} else {print "not ok 202\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Displacement \"displace\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Displacement \"displace\"\n") {print "ok 203\n";} else {print "not ok 203\n";}
 $bar = <TESTFILE>;
-if ($bar eq "CoordinateSystem \"mine\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "CoordinateSystem \"mine\"\n") {print "ok 204\n";} else {print "not ok 204\n";}
 $bar = <TESTFILE>;
-if ($bar eq "TransformBegin\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "TransformBegin\n") {print "ok 205\n";} else {print "not ok 205\n";}
 $bar = <TESTFILE>;
-if ($bar eq "TransformEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "TransformEnd\n") {print "ok 206\n";} else {print "not ok 206\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Attribute \"feo\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Attribute \"feo\"\n") {print "ok 207\n";} else {print "not ok 207\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Polygon \"P\" [1 2 3 4 5 6 ]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Polygon \"P\" [1 2 3 4 5 6]\n") {print "ok 208\n";} else {print "not ok 208\n";}
 $bar = <TESTFILE>;
-if ($bar eq "GeneralPolygon[2 2 ]  \"P\" [1 2 3 4 5 6 7 8 9 10 11 12 ]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "GeneralPolygon[2 2 ]  \"P\" [1 2 3 4 5 6 7 8 9 10 11 12]\n") {print "ok 209\n";} else {print "not ok 209\n";}
 $bar = <TESTFILE>;
-if ($bar eq "PointsPolygons[2 ] [0 1 ]  \"P\" [1 2 3 4 5 6 ]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "PointsPolygons[2 ] [0 1 ]  \"P\" [1 2 3 4 5 6]\n") {print "ok 210\n";} else {print "not ok 210\n";}
 $bar = <TESTFILE>;
-if ($bar eq "PointsGeneralPolygons[1 ] [2 ] [0 1 ]  \"P\" [1 2 3 4 5 6 ]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "PointsGeneralPolygons[1 ] [2 ] [0 1 ]  \"P\" [1 2 3 4 5 6]\n") {print "ok 211\n";} else {print "not ok 211\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Basis [2 1 -2 1 -3 -2 3 -1 0 1 0 0 1 0 0 0] 2 [-1 3 -3 1 3 -6 3 0 -3 3 0 0 1 0 0 0] 3\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Basis [2 1 -2 1 -3 -2 3 -1 0 1 0 0 1 0 0 0] 2 [-1 3 -3 1 3 -6 3 0 -3 3 0 0 1 0 0 0] 3\n") {print "ok 212\n";} else {print "not ok 212\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Patch \"bicubic\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Patch \"bicubic\"\n") {print "ok 213\n";} else {print "not ok 213\n";}
 $bar = <TESTFILE>;
-if ($bar eq "PatchMesh \"bilinear\" 1 \"yo\" 2 \"yow\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "PatchMesh \"bilinear\" 1 \"yo\" 2 \"yow\"\n") {print "ok 214\n";} else {print "not ok 214\n";}
 $bar = <TESTFILE>;
-if ($bar eq "TrimCurve [4 ][2 2 2 2 ][0 0 1 1 0 0 30.9472 30.9472 0 0 1 1 -30.9472 -30.9472 0 0] [0 0 0 -30.9472] [1 30.9472 1 0] [2 2 2 2 ][0 1 1 1 1 0 0 0] [0 0 0 1 1 1 1 0] [1 1 1 1 1 1 1 1]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "TrimCurve [4 ][2 2 2 2 ][0 0 1 1 0 0 30.9472 30.9472 0 0 1 1 -30.9472 -30.9472 0 0] [0 0 0 -30.9472] [1 30.9472 1 0] [2 2 2 2 ][0 1 1 1 1 0 0 0] [0 0 0 1 1 1 1 0] [1 1 1 1 1 1 1 1]\n") {print "ok 215\n";} else {print "not ok 215\n";}
 $bar = <TESTFILE>;
-if ($bar eq "NuPatch 9 3 [0 0 0 0.25 0.25 0.5 0.5 0.75 0.75 1 1 1] 0.000000 1.000000 5 3 [0 0 0 0.5 0.5 1 1 1] 0.000000 1.000000  \"Pw\" [0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 7.19955 0.103316 7.14788 0.707107 5.09085 -4.98126 5.05432 0.5 0.051666 -7.04457 7.14788 0.707107 -5.01778 -4.98126 5.05432 0.5 -7.09622 0.103316 7.14788 0.707107 -5.01778 5.12737 5.05432 0.5 0.051666 7.2512 7.14788 0.707107 5.09085 5.12737 5.05432 0.5 7.19955 0.103316 7.14788 0.707107 10.1817 0.146111 -8.74301e-016 1 7.19955 -7.04457 -6.18224e-016 0.707107 0.0730667 -9.96252 -8.74301e-016 1 -7.09622 -7.04457 -6.18224e-016 0.707107 -10.0356 0.146111 -8.74301e-016 1 -7.09622 7.2512 -6.18224e-016 0.707107 0.0730667 10.2547 -8.74301e-016 1 7.19955 7.2512 -6.18224e-016 0.707107 10.1817 0.146111 -8.74301e-016 1 7.19955 0.103316 -7.14788 0.707107 5.09085 -4.98126 -5.05432 0.5 0.051666 -7.04457 -7.14788 0.707107 -5.01778 -4.98126 -5.05432 0.5 -7.09622 0.103316 -7.14788 0.707107 -5.01778 5.12737 -5.05432 0.5 0.051666 7.2512 -7.14788 0.707107 5.09085 5.12737 -5.05432 0.5 7.19955 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 ]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "NuPatch 9 3 [0 0 0 0.25 0.25 0.5 0.5 0.75 0.75 1 1 1] 0.000000 1.000000 5 3 [0 0 0 0.5 0.5 1 1 1] 0.000000 1.000000  \"Pw\" [0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 0.051666 0.103316 7.14788 0.707107 0.0730667 0.146111 10.1086 1 7.19955 0.103316 7.14788 0.707107 5.09085 -4.98126 5.05432 0.5 0.051666 -7.04457 7.14788 0.707107 -5.01778 -4.98126 5.05432 0.5 -7.09622 0.103316 7.14788 0.707107 -5.01778 5.12737 5.05432 0.5 0.051666 7.2512 7.14788 0.707107 5.09085 5.12737 5.05432 0.5 7.19955 0.103316 7.14788 0.707107 10.1817 0.146111 -8.74301e-016 1 7.19955 -7.04457 -6.18224e-016 0.707107 0.0730667 -9.96252 -8.74301e-016 1 -7.09622 -7.04457 -6.18224e-016 0.707107 -10.0356 0.146111 -8.74301e-016 1 -7.09622 7.2512 -6.18224e-016 0.707107 0.0730667 10.2547 -8.74301e-016 1 7.19955 7.2512 -6.18224e-016 0.707107 10.1817 0.146111 -8.74301e-016 1 7.19955 0.103316 -7.14788 0.707107 5.09085 -4.98126 -5.05432 0.5 0.051666 -7.04457 -7.14788 0.707107 -5.01778 -4.98126 -5.05432 0.5 -7.09622 0.103316 -7.14788 0.707107 -5.01778 5.12737 -5.05432 0.5 0.051666 7.2512 -7.14788 0.707107 5.09085 5.12737 -5.05432 0.5 7.19955 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1 0.051666 0.103316 -7.14788 0.707107 0.0730667 0.146111 -10.1086 1]\n") {print "ok 216\n";} else {print "not ok 216\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Sphere 1 -1 1 360\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Sphere 1 -1 1 360\n") {print "ok 217\n";} else {print "not ok 217\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Cone 5 2 180\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Cone 5 2 180\n") {print "ok 218\n";} else {print "not ok 218\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Cylinder 2 -2 2 90\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Cylinder 2 -2 2 90\n") {print "ok 219\n";} else {print "not ok 219\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Hyperboloid 1 2 3 4 5 6 360\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Hyperboloid 1 2 3 4 5 6 360\n") {print "ok 220\n";} else {print "not ok 220\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Paraboloid 2 4 7 120\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Paraboloid 2 4 7 120\n") {print "ok 221\n";} else {print "not ok 221\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Disk 0 3 260\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Disk 0 3 260\n") {print "ok 222\n";} else {print "not ok 222\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Torus 5 1 0 360 360\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Torus 5 1 0 360 360\n") {print "ok 223\n";} else {print "not ok 223\n";}
 $bar = <TESTFILE>;
-if ($bar eq "Geometry \"complex\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "Geometry \"complex\"\n") {print "ok 224\n";} else {print "not ok 224\n";}
 $bar = <TESTFILE>;
-if ($bar eq "SolidBegin \"xor\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "SolidBegin \"xor\"\n") {print "ok 225\n";} else {print "not ok 225\n";}
 $bar = <TESTFILE>;
-if ($bar eq "SolidEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "SolidEnd\n") {print "ok 226\n";} else {print "not ok 226\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ObjectBegin 1\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ObjectBegin 1\n") {print "ok 227\n";} else {print "not ok 227\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ObjectEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ObjectEnd\n") {print "ok 228\n";} else {print "not ok 228\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ObjectInstance 1\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ObjectInstance 1\n") {print "ok 229\n";} else {print "not ok 229\n";}
 $bar = <TESTFILE>;
-if ($bar eq "MotionBegin [0 0.2 0.4 0.6 0.8 1]\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "MotionBegin [0 0.2 0.4 0.6 0.8 1]\n") {print "ok 230\n";} else {print "not ok 230\n";}
 $bar = <TESTFILE>;
-if ($bar eq "MotionEnd\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "MotionEnd\n") {print "ok 231\n";} else {print "not ok 231\n";}
 $bar = <TESTFILE>;
-if ($bar eq "ReadArchive \"file.rib\"\n") {print "ok $n\n";} else {print "not ok $n\n";} $n++;
+if ($bar eq "ReadArchive \"file.rib\"\n") {print "ok 232\n";} else {print "not ok 232\n";}
 
 close(TESTFILE);
 unlink "./foo";
+
+print RenderMan::RI_CURRENT eq "current" ? "ok 233" : "not ok 233", "\n";
+print RenderMan::RI_WORLD   eq "world"   ? "ok 234" : "not ok 234", "\n";
+print RenderMan::RI_OBJECT  eq "object"  ? "ok 235" : "not ok 235", "\n";
+print RenderMan::RI_SHADER  eq "shader"  ? "ok 236" : "not ok 236", "\n";
+print RenderMan::RI_RASTER  eq "raster"  ? "ok 237" : "not ok 237", "\n";
+print RenderMan::RI_NDC     eq "NDC"     ? "ok 238" : "not ok 238", "\n";
+print RenderMan::RI_SCREEN  eq "screen"  ? "ok 239" : "not ok 239", "\n";
+print RenderMan::RI_CAMERA  eq "camera"  ? "ok 240" : "not ok 240", "\n";
+print RenderMan::RI_EYE     eq "eye"     ? "ok 241" : "not ok 241", "\n";
