@@ -1,5 +1,9 @@
 Revision history for Perl extension RenderMan.
 
+0.04  Thu Sep 07 11:08:00 2000
+        - Fixed a few bugs related to integer and string
+          handling; Glenn M. Lewis
+
 0.03  Thu Aug 31 21:04:00 2000
         - Updated to support BMRT 2.5.0.8; Glenn M. Lewis
         - Updated to support Perl 5.6; Glenn M. Lewis

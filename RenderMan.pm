@@ -276,7 +276,7 @@ require AutoLoader;
 	ArchiveRecord
 	ReadArchive
 );
-$VERSION = '0.02';
+$VERSION = '0.04';
 
 bootstrap RenderMan $VERSION;
 

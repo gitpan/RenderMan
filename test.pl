@@ -252,6 +252,8 @@ Begin("foo");
   TransformBegin();
   TransformEnd();
   Attribute("feo");
+  Attribute("light", {"integer nsamples" => 4});
+  Attribute("light", {"string shadows" => "on"});
   Polygon(2, { "P" => [1,2,3, 4,5,6] });
   GeneralPolygon(2, [2,2], { "P" => [1,2,3, 4,5,6, 7,8,9, 10,11,12] });
   PointsPolygons(1, [2], [0,1], { "P" => [1,2,3, 4,5,6] });
@@ -420,6 +422,10 @@ $bar = <TESTFILE>;
 if ($bar eq "TransformEnd\n") {print "ok 206\n";} else {print "not ok 206\n";}
 $bar = <TESTFILE>;
 if ($bar eq "Attribute \"feo\"\n") {print "ok 207\n";} else {print "not ok 207\n";}
+$bar = <TESTFILE>;
+if ($bar eq "Attribute \"light\" \"integer nsamples\" [4 ]\n") {print "ok 207.5\n";} else {print "not ok 207.5\n";}
+$bar = <TESTFILE>;
+if ($bar eq "Attribute \"light\" \"string shadows\" [\"on\"]\n") {print "ok 207.6\n";} else {print "not ok 207.6\n";}
 $bar = <TESTFILE>;
 if ($bar eq "Polygon \"P\" [1 2 3 4 5 6]\n") {print "ok 208\n";} else {print "not ok 208\n";}
 $bar = <TESTFILE>;

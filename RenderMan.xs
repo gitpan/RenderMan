@@ -282,6 +282,8 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
   char* key;
   I32 retlen;
   RtFloat* val = 0;
+  RtInt* ival = 0;
+  char** sval = 0;
   int len;
 
   if (SvPOK(svp)) {
@@ -304,10 +306,17 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
       for (count=0; sv=hv_iternextsv(hash,&key,&retlen); ) {
 	  if (SvIOK(sv)) {  /* integer value */
 	      token[count] = key;
-	      if (!(val = (RtFloat*)malloc(sizeof(RtFloat))))
+              if (strncmp(key, "integer ", 8)==0) {
+                if (!(ival = (RtInt*)malloc(sizeof(RtInt))))
 		  croak("Out of memory in build_token_params");
-	      *val = (RtFloat)SvIV(sv);
-	      params[count] = (RtPointer)val;
+                *ival = (RtInt)SvIV(sv);
+                params[count] = (RtPointer)ival;
+              } else {  // Treat as a float
+                if (!(val = (RtFloat*)malloc(sizeof(RtFloat))))
+		  croak("Out of memory in build_token_params");
+                *val = (RtFloat)SvIV(sv);
+                params[count] = (RtPointer)val;
+              }
 	      count++;
 	      /* warn("WARNING: ignoring hash key '%s'...type is integer value: %ld", key, SvIV(sv)); */
 	  } else if (SvNOK(sv)) {  /* double */
@@ -320,7 +329,10 @@ RtInt build_token_params(SV* svp, RtToken** ret_token, RtPointer** ret_params,
 	      /* warn("WARNING: ignoring hash key '%s'...type is double value: %g", key, SvNV(sv)); */
 	  } else if (SvPOK(sv)) {  /* string */
 	      token[count] = key;
-	      params[count] = (RtPointer)strdup(SvPV_nolen(sv));
+              if (!(sval = (char**)malloc(sizeof(char*))))
+		  croak("Out of memory in build_token_params");
+              *sval = (char*)strdup(SvPV_nolen(sv));
+	      params[count] = (RtPointer)sval;
 	      count++;
 	  } else if (SvROK(sv)) {  /* reference */
 	      if (SvTYPE(SvRV(sv)) == SVt_IV) {
